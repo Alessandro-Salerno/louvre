@@ -16,7 +16,7 @@ AlignConsecutiveShortCaseStatements:
   AlignCaseColons: false
 AllowShortFunctionsOnASingleLine: 'false'
 IndentCaseLabels: 'false'
-IndentWidth: '2'
+IndentWidth: '4'
 SpaceBeforeParens: ControlStatements
 SpacesInCStyleCastParentheses: 'false'
 SpacesInSquareBrackets: 'false'
