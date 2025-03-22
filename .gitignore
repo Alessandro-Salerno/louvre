@@ -1,6 +1,3 @@
-build/*.cmake
-build/*.txt
-build/CMakeFiles
-
+build/
 *.a
 *.o
