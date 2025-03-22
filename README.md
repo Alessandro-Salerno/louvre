@@ -1,6 +1,29 @@
 # `louvre`
 `louvre` is a simple and extensible markup language meant to provide a single source frontend for multiple output formats.
 
+```c
+#
+#center
+	WELCOME TO LOUVRE #
+	SIMPLE AND EXTENSIBLE MARKUP LANGUAGE
+#end
+#
+#justify
+	Introduction
+	#
+	#paragraph
+		This is a demo of louvre!
+	#end
+	#
+	Credits
+	#
+	#paragraph
+		This was made by Alessandro Salerno (alevm1710)!
+	#end
+#end
+
+```
+
 ## Syntax
 `louvre` is meant to be fast to type and easy to learn. It uses tags starting with `#` to instruct the parser and the emitter on how to interpret a block. `louvre` ignores new line and tab characters in order to allow for more flexibility in both the user code and parser implementation.
 
