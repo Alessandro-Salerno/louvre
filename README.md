@@ -1,7 +1,7 @@
 # `louvre`
 `louvre` is a simple and extensible markup language meant to provide a single source frontend for multiple output formats.
 
-```c
+```
 #
 #center
 	WELCOME TO LOUVRE #
@@ -9,19 +9,15 @@
 #end
 #
 #justify
-	Introduction
-	#
+	Introduction #
 	#paragraph
 		This is a demo of louvre!
 	#end
-	#
-	Credits
-	#
+	# Credits #
 	#paragraph
 		This was made by Alessandro Salerno (alevm1710)!
 	#end
 #end
-
 ```
 
 ## Syntax
