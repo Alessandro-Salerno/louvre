@@ -91,7 +91,7 @@ class Tag {
     }
 };
 
-class Node : std::enable_shared_from_this<Node> {
+class Node : public std::enable_shared_from_this<Node> {
     private:
     const std::variant<StandardNodeType, std::wstring_view> mType;
     std::optional<std::wstring_view>                        mText;
@@ -103,7 +103,7 @@ class Node : std::enable_shared_from_this<Node> {
     Node() : Node(StandardNodeType::Root) {};
     Node(StandardNodeType type) : mType(type) {};
     Node(std::wstring_view type) : mType(type) {};
-    Node(Node &&other) noexcept;
+    Node(Node &&other) noexcept = default;
 
     static inline Node text(std::wstring_view text) {
         Node n(StandardNodeType::Text);

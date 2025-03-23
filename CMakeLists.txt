@@ -9,4 +9,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 include_directories("include")
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
+add_subdirectory(tests)
 
+add_compile_options(-fsanitize=address)
+add_link_options(-fsanitize=address)

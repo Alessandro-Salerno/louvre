@@ -24,6 +24,10 @@
 
 namespace louvre {
 Parser::Parser(std::wstring_view source) : mSource(source) {
+    this->mOffset = 0;
+    this->mLine   = 0;
+    this->mColumn = 0;
+
     // #end
     this->add_tag_binding(L"end", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::End, Node(StandardNodeType::Null));
