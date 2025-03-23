@@ -23,6 +23,67 @@
 #include <variant>
 
 namespace louvre {
+Parser::Parser(std::wstring_view source) : mSource(source) {
+    // #end
+    this->add_tag_binding(L"end", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::End, Node(StandardNodeType::Null));
+    });
+
+    // #left
+    this->add_tag_binding(L"left", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Left));
+    });
+
+    // #center
+    this->add_tag_binding(L"center", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Center));
+    });
+
+    // #right
+    this->add_tag_binding(L"right", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Right));
+    });
+
+    // #justify
+    this->add_tag_binding(L"justify", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Justify));
+    });
+
+    // #paragraph
+    this->add_tag_binding(L"paragraph", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Paragraph));
+    });
+
+    // #numbers
+    this->add_tag_binding(L"numbers", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Numebrs));
+    });
+
+    // #bullets
+    this->add_tag_binding(L"bullets", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Bullets));
+    });
+
+    // #item
+    this->add_tag_binding(L"item", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChildAndBranch,
+                              Node(StandardNodeType::Item));
+    });
+
+    // # (new line)
+    this->add_tag_binding(L"", [](std::shared_ptr<Tag> tag) {
+        return std::make_pair(ParserAction::AddChild,
+                              Node(StandardNodeType::LineBreak));
+    });
+}
+
 std::variant<std::shared_ptr<Node>, SyntaxError, TagError, NodeError>
 Parser::parse() {
     auto root = std::make_shared<Node>();

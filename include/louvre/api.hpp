@@ -216,7 +216,7 @@ class Parser {
     std::size_t mColumn;
 
     public:
-    Parser(std::wstring_view source) : mSource(source) {};
+    Parser(std::wstring_view source);
 
     inline void add_tag_binding(
         std::wstring_view tag,
