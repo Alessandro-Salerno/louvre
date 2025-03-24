@@ -50,8 +50,9 @@ int main(void) {
     auto parse_res = parser.parse();
 
     if (auto e = std::get_if<louvre::SyntaxError>(&parse_res)) {
-        std::cout << "Syntax Error at " << e->location().line() << ":"
-                  << e->location().column() << std::endl;
+        std::wcout << "Syntax Error " << e->message() << " at " << " at "
+                   << e->location().line() << ":" << e->location().column()
+                   << std::endl;
 
         return -1;
     }

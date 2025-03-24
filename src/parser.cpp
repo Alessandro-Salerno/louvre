@@ -224,8 +224,10 @@ std::wstring Parser::collect_sequence() {
 }
 
 const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
-    std::wstring tag_name = this->collect_sequence();
-    auto         tag      = std::make_shared<Tag>(tag_name, this->location());
+    this->advance();
+    SourceLocation location = this->location();
+    std::wstring   tag_name = this->collect_sequence();
+    auto           tag      = std::make_shared<Tag>(tag_name, location);
 
     if (std::holds_alternative<SyntaxError>(this->consume_if(L"("))) {
         return tag;
