@@ -1,7 +1,7 @@
 include(CTest)
 
-add_executable(test1 test1.cpp)
-target_link_libraries(test1 ${PROJECT_NAME})
+add_executable(basic-document basic-document.cpp)
+target_link_libraries(basic-document ${PROJECT_NAME})
 
 enable_testing()
-add_test(NAME test1 COMMAND $<TARGET_FILE:test1>)
+add_test(NAME basic-document COMMAND $<TARGET_FILE:basic-document>)

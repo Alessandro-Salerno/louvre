@@ -38,9 +38,36 @@ const std::wstring SOURCE = L"#\n"
                             "#end\n"
                             "#end\n";
 
+/*bool compare_tag(std::optional<std::shared_ptr<louvre::Tag>> o1,
+                 std::optional<std::shared_ptr<louvre::Tag>> o2) {
+    massert(o1.has_value() == o2.has_value());
+
+    if (!o1.has_value()) {
+        return true;
+    }
+
+    auto t1 = o1->get();
+    auto t2 = o2->get();
+
+    massert(t1->name() == t2->name());
+    massert(t1->location().line() == t2->location().line());
+    massert(t1->location().column() == t2->location().column());
+    return true;
+}*/
+
 bool compare_nodes(std::shared_ptr<louvre::Node> n1,
-                   std::shared_ptr<louvre::Node> n2) {
-    massert(n1 == n2);
+                   std::shared_ptr<louvre::Node> n2,
+                   std::size_t                   nest = 0) {
+    std::cout << "Testing nest level " << nest << std::endl;
+    massert(n1->type() == n2->type());
+    massert(n1->text() == n2->text());
+    massert(n1->children().size() == n2->children().size());
+
+    for (int i = 0; i < n1->children().size(); i++) {
+        massert(compare_nodes(
+            n1->children().at(i), n2->children().at(i), nest + 1));
+    }
+
     return true;
 }
 
