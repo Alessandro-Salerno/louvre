@@ -23,7 +23,6 @@
 #include <variant>
 #include <vector>
 
-#include <string_view>
 #include <unordered_map>
 
 namespace louvre {
@@ -66,15 +65,15 @@ class SourceLocation {
 
 class Tag {
     private:
-    const std::wstring_view        mName;
-    const SourceLocation           mLocation;
-    std::vector<std::wstring_view> mArguments;
+    const std::wstring        mName;
+    const SourceLocation      mLocation;
+    std::vector<std::wstring> mArguments;
 
     public:
-    Tag(std::wstring_view name, SourceLocation location)
+    Tag(std::wstring name, SourceLocation location)
         : mName(name), mLocation(location) {};
 
-    inline const std::wstring_view name() const {
+    inline const std::wstring name() const {
         return this->mName;
     }
 
@@ -82,41 +81,40 @@ class Tag {
         return this->mLocation;
     }
 
-    inline const std::vector<std::wstring_view> arguments() const {
+    inline const std::vector<std::wstring> arguments() const {
         return this->mArguments;
     }
 
-    inline void add_argument(std::wstring_view argument) {
+    inline void add_argument(std::wstring argument) {
         this->mArguments.push_back(argument);
     }
 };
 
 class Node : public std::enable_shared_from_this<Node> {
     private:
-    const std::variant<StandardNodeType, std::wstring_view> mType;
-    std::optional<std::wstring_view>                        mText;
-    std::optional<std::shared_ptr<Tag>>                     mTag;
-    std::optional<std::shared_ptr<Node>>                    mParent;
-    std::vector<std::shared_ptr<Node>>                      mChildren;
+    const std::variant<StandardNodeType, std::wstring> mType;
+    std::optional<std::wstring>                        mText;
+    std::optional<std::shared_ptr<Tag>>                mTag;
+    std::optional<std::shared_ptr<Node>>               mParent;
+    std::vector<std::shared_ptr<Node>>                 mChildren;
 
     public:
     Node() : Node(StandardNodeType::Root) {};
     Node(StandardNodeType type) : mType(type) {};
-    Node(std::wstring_view type) : mType(type) {};
+    Node(std::wstring type) : mType(type) {};
     Node(Node &&other) noexcept = default;
 
-    static inline Node text(std::wstring_view text) {
+    static inline Node text(std::wstring text) {
         Node n(StandardNodeType::Text);
         n.mText = text;
         return n; // ret val optimization helps here
     }
 
-    inline const std::variant<StandardNodeType, std::wstring_view>
-    type() const {
+    inline const std::variant<StandardNodeType, std::wstring> type() const {
         return this->mType;
     }
 
-    inline const std::optional<std::wstring_view> text() const {
+    inline const std::optional<std::wstring> text() const {
         return this->mText;
     }
 
@@ -152,14 +150,14 @@ class Node : public std::enable_shared_from_this<Node> {
 
 class SyntaxError {
     private:
-    const std::wstring_view mMessage;
-    const SourceLocation    mLocation;
+    const std::wstring   mMessage;
+    const SourceLocation mLocation;
 
     public:
-    SyntaxError(std::wstring_view message, SourceLocation location)
+    SyntaxError(std::wstring message, SourceLocation location)
         : mMessage(message), mLocation(location) {};
 
-    inline const std::wstring_view message() const {
+    inline const std::wstring message() const {
         return this->mMessage;
     }
 
@@ -170,14 +168,14 @@ class SyntaxError {
 
 class TagError {
     private:
-    const std::wstring_view    mMessage;
+    const std::wstring         mMessage;
     const std::shared_ptr<Tag> mTag;
 
     public:
-    TagError(std::wstring_view message, std::shared_ptr<Tag> tag)
+    TagError(std::wstring message, std::shared_ptr<Tag> tag)
         : mMessage(message), mTag(tag) {};
 
-    inline const std::wstring_view message() const {
+    inline const std::wstring message() const {
         return this->mMessage;
     }
 
@@ -188,14 +186,14 @@ class TagError {
 
 class NodeError {
     private:
-    const std::wstring_view     mMessage;
+    const std::wstring          mMessage;
     const std::shared_ptr<Node> mNode;
 
     public:
-    NodeError(std::wstring_view message, std::shared_ptr<Node> node)
+    NodeError(std::wstring message, std::shared_ptr<Node> node)
         : mMessage(message), mNode(node) {};
 
-    inline const std::wstring_view message() const {
+    inline const std::wstring message() const {
         return this->mMessage;
     }
 
@@ -206,9 +204,9 @@ class NodeError {
 
 class Parser {
     private:
-    const std::wstring_view mSource;
+    const std::wstring mSource;
     std::unordered_map<
-        std::wstring_view,
+        std::wstring,
         std::function<std::pair<ParserAction, Node>(std::shared_ptr<Tag>)>>
                 mTagBindings;
     std::size_t mOffset;
@@ -216,10 +214,10 @@ class Parser {
     std::size_t mColumn;
 
     public:
-    Parser(std::wstring_view source);
+    Parser(std::wstring source);
 
     inline void add_tag_binding(
-        std::wstring_view tag,
+        std::wstring tag,
         std::function<std::pair<ParserAction, Node>(std::shared_ptr<Tag>)>
             binding) {
         this->mTagBindings[tag] = binding;
@@ -241,7 +239,7 @@ class Parser {
     inline wchar_t                      consume();
     void                                skip_whitespace();
     const std::variant<wchar_t, SyntaxError>
-                 consume_if(const std::wstring_view &allowed);
+                 consume_if(const std::wstring &allowed);
     std::wstring collect_sequence();
     const std::variant<std::shared_ptr<Tag>, SyntaxError> collect_tag();
     const std::variant<std::pair<ParserAction, std::shared_ptr<Node>>, TagError>

@@ -9,7 +9,7 @@
  *   Unless required by applicable law or agreed to in writing, software
  *   distributed under the License is distributed on an "AS IS" BASIS,
  *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *   See the License for the specific language governing permissions and
+ *   See the License for the specific la nguage governing permissions and
  *   limitations under the License.
  */
 
@@ -23,7 +23,7 @@
 #include <variant>
 
 namespace louvre {
-Parser::Parser(std::wstring_view source) : mSource(source) {
+Parser::Parser(std::wstring source) : mSource(source) {
     this->mOffset = 0;
     this->mLine   = 0;
     this->mColumn = 0;
@@ -201,12 +201,12 @@ void Parser::skip_whitespace() {
 }
 
 const std::variant<wchar_t, SyntaxError>
-Parser::consume_if(const std::wstring_view &allowed) {
+Parser::consume_if(const std::wstring &allowed) {
     if (!this->peek().has_value()) {
         return SyntaxError(L"Unexpected EOF", this->location());
     }
 
-    if (std::wstring_view::npos == allowed.find(this->quick_peek())) {
+    if (std::wstring::npos == allowed.find(this->quick_peek())) {
         return SyntaxError(L"Unexpected token", this->location());
     }
 
@@ -227,7 +227,7 @@ const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
     this->advance();
     SourceLocation location = this->location();
     std::wstring   tag_name = this->collect_sequence();
-    auto           tag      = std::make_shared<Tag>(tag_name, location);
+    auto           tag = std::make_shared<Tag>(std::move(tag_name), location);
 
     if (std::holds_alternative<SyntaxError>(this->consume_if(L"("))) {
         return tag;

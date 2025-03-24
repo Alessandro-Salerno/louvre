@@ -16,6 +16,7 @@
 #include <iostream>
 #include <louvre/api.hpp>
 #include <memory>
+#include <string>
 
 #define mstr(x) #x
 
@@ -25,19 +26,17 @@
         return false;                                                \
     }
 
-#include <string_view>
-
-constexpr const std::wstring_view SOURCE = L"#\n"
-                                           "#center\n"
-                                           "THIS IS THE TITLE\n"
-                                           "#end\n"
-                                           "#\n"
-                                           "#justify\n"
-                                           "Hello there, this is some text! #\n"
-                                           "#paragraph\n"
-                                           "And this is a paragraph!\n"
-                                           "#end\n"
-                                           "#end\n";
+const std::wstring SOURCE = L"#\n"
+                            "#center\n"
+                            "THIS IS THE TITLE\n"
+                            "#end\n"
+                            "#\n"
+                            "#justify\n"
+                            "Hello there, this is some text! #\n"
+                            "#paragraph\n"
+                            "And this is a paragraph!\n"
+                            "#end\n"
+                            "#end\n";
 
 bool compare_nodes(std::shared_ptr<louvre::Node> n1,
                    std::shared_ptr<louvre::Node> n2) {
@@ -50,7 +49,7 @@ int main(void) {
     auto parse_res = parser.parse();
 
     if (auto e = std::get_if<louvre::SyntaxError>(&parse_res)) {
-        std::wcout << "Syntax Error " << e->message() << " at " << " at "
+        std::wcout << "Syntax Error " << e->message() << " at "
                    << e->location().line() << ":" << e->location().column()
                    << std::endl;
 
@@ -58,8 +57,9 @@ int main(void) {
     }
 
     if (auto e = std::get_if<louvre::TagError>(&parse_res)) {
-        std::cout << "Syntax Error at " << e->tag()->location().line() << ":"
-                  << e->tag()->location().column() << std::endl;
+        std::wcout << "Tag Error " << e->message() << "(" << e->tag()->name()
+                   << ") at " << e->tag()->location().line() << ":"
+                   << e->tag()->location().column() << std::endl;
 
         return -1;
     }
@@ -73,7 +73,7 @@ int main(void) {
     std::cout << "Root has " << root->children().size() << " children"
               << std::endl;
 
-    /*auto mroot = std::make_shared<louvre::Node>();
+    auto mroot = std::make_shared<louvre::Node>();
     auto center =
         std::make_shared<louvre::Node>(louvre::StandardNodeType::Center);
     center->add_child(std::make_shared<louvre::Node>(
@@ -100,7 +100,7 @@ int main(void) {
 
     if (!compare_nodes(root, mroot)) {
         return -1;
-    }*/
+    }
 
     return 0;
 }
