@@ -108,7 +108,8 @@ int main(int argc, const char *const argv[]) {
         parse_result = parser.parse();
 
     // EXAMPLE: output number of children of the root node
-    if (auto root = *std::get_if<std::shared_ptr<louvre::Node>>(&parse_result)) {
+    if (auto rootp = std::get_if<std::shared_ptr<louvre::Node>>(&parse_result)) {
+        auto root = *rootp;
         std::cout << "Root has " << root->children().size() << " children"
                   << std::endl;
     }
