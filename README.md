@@ -1,4 +1,24 @@
 # `louvre`
+[contributors-shield]: https://img.shields.io/github/contributors/Alessandro-Salerno/louvre.svg?style=flat-square
+[contributors-url]: https://github.com/Alessandro-Salerno/louvre/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Alessandro-Salerno/louvre.svg?style=flat-square
+[forks-url]: https://github.com/Alessandro-Salerno/louvre/network/members
+[stars-shield]: https://img.shields.io/github/stars/Alessandro-Salerno/louvre.svg?style=flat-square
+[stars-url]: https://github.com/Alessandro-Salerno/louvre/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Alessandro-Salerno/louvre.svg?style=flat-square
+[issues-url]: https://github.com/Alessandro-Salerno/louvre/issues
+[license-shield]: https://img.shields.io/github/license/Alessandro-Salerno/louvre.svg?style=flat-square
+[license-url]: https://github.com/Alessandro-Salerno/louvre/blob/master/LICENSE.txt
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+![](https://tokei.rs/b1/github/Alessandro-Salerno/louvre)
+![shield](https://img.shields.io/static/v1?label=version&message=0.1.0&color=blue) 
+
+
 `louvre` is a simple and extensible markup language meant to provide a single source frontend for multiple output formats.
 
 ```
@@ -55,6 +75,59 @@ Emitters may implement their own tags or extend standard tags with arguments. Fo
 ```
 #bullets(*)
 ```
+
+## Using `liblouvre`
+Using `liblouvre` is as simple as including the `louvre/api.hpp` file, linking to the static library and implementing a program that makes use of the API:
+```cpp
+include <fstream>
+#include <iostream>
+#include <louvre/api.hpp>
+#include <variant>
+
+int main(int argc, const char *const argv[]) {
+    if (argc != 2) {
+        std::cerr << "ERROR: Need exactly one argument: file path" << std::endl;
+        return -1;
+    }
+
+    // Open wchar input stream
+    std::wifstream input(argv[1]);
+
+    // Read whole file
+    std::wstring source((std::istreambuf_iterator<wchar_t>(input)),
+                        std::istreambuf_iterator<wchar_t>());
+
+    // Create the louvre parser instance using the contents of the file
+    auto parser = louvre::Parser(source);
+
+    // Parse the file
+    std::variant<std::shared_ptr<louvre::Node>,
+                 louvre::SyntaxError,
+                 louvre::TagError,
+                 louvre::NodeError>
+        parse_result = parser.parse();
+
+    // EXAMPLE: output number of children of the root node
+    if (auto root = *std::get_if<std::shared_ptr<louvre::Node>>(&parse_result)) {
+        std::cout << "Root has " << root->children().size() << " children"
+                  << std::endl;
+    }
+}
+
+```
+
+## Building `liblouvre`
+To build `liblouvre`, you'll need a C++ compiler compatible with C++ 20 and [Cmake](https://cmake.org/). Once the necessary software is installed, just type the following command:
+```bash
+git clone https://github.com/Alessandro-Salerno/louvre && \
+cd louvre && \
+mkdir -p build && \
+cd build && \
+cmake .. && \
+make && \
+ctest
+```
+The resulting `liblouvre.a` file will be in the `build` directory.
 
 ## License
 Distributed under the Apache License 2.0. See [LICENSE](LICENSE) for details.
