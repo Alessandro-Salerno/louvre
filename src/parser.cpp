@@ -198,6 +198,9 @@ inline wchar_t Parser::consume() {
 }
 
 void Parser::skip_whitespace() {
+    while (this->can_advance() && std::iswspace(this->quick_peek())) {
+        this->advance();
+    }
 }
 
 const std::variant<wchar_t, SyntaxError>
