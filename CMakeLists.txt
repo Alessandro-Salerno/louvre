@@ -16,3 +16,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories("include")
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 add_subdirectory(tests)
+
+install(TARGETS louvre
+        DESTINATION lib)
+
+install(DIRECTORY include/louvre/
+        DESTINATION include)
