@@ -20,5 +20,5 @@ add_subdirectory(tests)
 install(TARGETS louvre
         DESTINATION lib)
 
-install(DIRECTORY include/louvre/
+install(DIRECTORY include/
         DESTINATION include)
