@@ -76,6 +76,32 @@ Emitters may implement their own tags or extend standard tags with arguments. Fo
 #bullets(*)
 ```
 
+## Installing `liblouvre`
+If you're using CMake as build system, your `CMakeLists.txt`file should look something like this:
+```cmake
+cmake_minimum_required(VERSION 3.16) # Change this as you please, as ong as it works
+project(myproject) # Change this to the name of your project
+
+include(ExternalProject)
+
+set(LOUVRE louvre_project)
+ExternalProject_Add(
+    louvre_project
+    GIT_REPOSITORY https://github.com/Alessandro-Salerno/louvre
+    GIT_TAG <commit>
+    PREFIX ${PROJECT_SOURCE_DIR}/external/${LOUVRE}
+    CONFIGURE_COMMAND cmake ../${LOUVRE}
+    BUILD_COMMAND cmake --build .
+    INSTALL_COMMAND cmake --install . --prefix ${PROJECT_SOURCE_DIR}
+    UPDATE_COMMAND ""
+)
+
+add_library(louvre STATIC IMPORTED)
+set_property(TARGET louvre PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/liblouvre.a)
+add_dependencies(louvre louvre_project)
+```
+Remember to replace `<commit>` with the commit tag of the version you're interested in.
+
 ## Using `liblouvre`
 Using `liblouvre` is as simple as including the `louvre/api.hpp` file, linking to the static library and implementing a program that makes use of the API:
 ```cpp
