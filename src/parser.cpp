@@ -288,6 +288,7 @@ Parser::collect_block() {
             if (!buf.ends_with(' ')) {
                 buf.push_back(cur);
             }
+            this->advance();
             continue;
         }
 
