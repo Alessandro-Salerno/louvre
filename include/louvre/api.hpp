@@ -97,11 +97,12 @@ class Node : public std::enable_shared_from_this<Node> {
     std::optional<std::shared_ptr<Tag>>                mTag;
     std::optional<std::shared_ptr<Node>>               mParent;
     std::vector<std::shared_ptr<Node>>                 mChildren;
+    std::size_t                                        mNum;
 
     public:
     Node() : Node(StandardNodeType::Root) {};
     Node(StandardNodeType type) : mType(type) {};
-    Node(std::wstring type) : mType(type) {};
+    Node(std::wstring type) : mType(type), mNum(0) {};
     Node(Node &&other) noexcept = default;
 
     static inline Node text(std::wstring text) {
@@ -130,7 +131,12 @@ class Node : public std::enable_shared_from_this<Node> {
         return this->mChildren;
     }
 
+    inline const std::size_t number() const {
+        return this->mNum;
+    }
+
     inline void add_child(std::shared_ptr<Node> child) {
+        child->mNum = this->children().size();
         this->add_dangling_child(child);
         child->set_parent(this->shared_from_this());
     }

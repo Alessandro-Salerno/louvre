@@ -284,6 +284,13 @@ Parser::collect_block() {
             continue;
         }
 
+        if (' ' == cur) {
+            if (!buf.ends_with(' ')) {
+                buf.push_back(cur);
+            }
+            continue;
+        }
+
         const wchar_t next = this->quick_peek(1);
 
         if (cur == next && '#' == cur) {
@@ -293,6 +300,10 @@ Parser::collect_block() {
         }
 
         if ('\n' == cur || '\r' == cur) {
+            if (!buf.ends_with(' ')) {
+                buf.push_back(' ');
+            }
+
             this->advance();
             this->advance_line();
             continue;
