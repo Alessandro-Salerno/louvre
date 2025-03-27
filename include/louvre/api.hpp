@@ -41,8 +41,7 @@ enum class StandardNodeType {
     Text,
     LineBreak,
     Null,
-    Group,
-    Custom,
+    Group
 };
 
 class SourceLocation {
@@ -66,7 +65,7 @@ class SourceLocation {
 class Tag {
     private:
     const std::u8string        mName;
-    const SourceLocation      mLocation;
+    const SourceLocation       mLocation;
     std::vector<std::u8string> mArguments;
 
     public:
@@ -94,10 +93,10 @@ class Node : public std::enable_shared_from_this<Node> {
     private:
     const std::variant<StandardNodeType, std::u8string> mType;
     std::optional<std::u8string>                        mText;
-    std::optional<std::shared_ptr<Tag>>                mTag;
-    std::optional<std::shared_ptr<Node>>               mParent;
-    std::vector<std::shared_ptr<Node>>                 mChildren;
-    std::size_t                                        mNum;
+    std::optional<std::shared_ptr<Tag>>                 mTag;
+    std::optional<std::shared_ptr<Node>>                mParent;
+    std::vector<std::shared_ptr<Node>>                  mChildren;
+    std::size_t                                         mNum;
 
     public:
     Node() : Node(StandardNodeType::Root) {};
@@ -156,7 +155,7 @@ class Node : public std::enable_shared_from_this<Node> {
 
 class SyntaxError {
     private:
-    const std::u8string   mMessage;
+    const std::u8string  mMessage;
     const SourceLocation mLocation;
 
     public:
@@ -174,7 +173,7 @@ class SyntaxError {
 
 class TagError {
     private:
-    const std::u8string         mMessage;
+    const std::u8string        mMessage;
     const std::shared_ptr<Tag> mTag;
 
     public:
@@ -192,7 +191,7 @@ class TagError {
 
 class NodeError {
     private:
-    const std::u8string          mMessage;
+    const std::u8string         mMessage;
     const std::shared_ptr<Node> mNode;
 
     public:
@@ -234,18 +233,18 @@ class Parser {
 
     private:
     static inline bool          is_tag_char(char32_t c);
-    static inline std::u8string  trim(std::u8string &s);
+    static inline std::u8string trim(std::u8string &s);
     inline const SourceLocation location() const;
     inline bool                 can_advance(std::size_t amount = 1) const;
     inline void                 advance(std::size_t amount = 1);
     inline void                 backtracK(std::size_t amount = 1);
     inline const std::optional<char32_t> peek(std::size_t ahead = 0) const;
-    inline char32_t                      quick_peek(std::size_t ahead = 0) const;
-    inline void                         advance_line();
-    inline char32_t                      consume();
-    void                                skip_whitespace();
+    inline char32_t quick_peek(std::size_t ahead = 0) const;
+    inline void     advance_line();
+    inline char32_t consume();
+    void            skip_whitespace();
     const std::variant<char32_t, SyntaxError>
-                 consume_if(const std::u8string &allowed);
+                  consume_if(const std::u8string &allowed);
     std::u8string collect_sequence();
     const std::variant<std::shared_ptr<Tag>, SyntaxError> collect_tag();
     const std::variant<std::pair<ParserAction, std::shared_ptr<Node>>, TagError>

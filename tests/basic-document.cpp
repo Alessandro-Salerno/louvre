@@ -13,6 +13,7 @@
  *   limitations under the License.
  */
 
+#include <clocale>
 #include <iostream>
 #include <louvre/api.hpp>
 #include <memory>
@@ -27,16 +28,16 @@
     }
 
 const std::u8string SOURCE = u8"#\n"
-                            "#center\n"
-                            "THIS IS THE TITLE\n"
-                            "#end\n"
-                            "#\n"
-                            "#justify\n"
-                            "Hello there, this is some text! #\n"
-                            "#paragraph\n"
-                            "And this is a paragraph!\n"
-                            "#end\n"
-                            "#end\n";
+                             "#center\n"
+                             "THIS IS THE TITLE\n"
+                             "#end\n"
+                             "#\n"
+                             "#justify\n"
+                             "Hello there, this is some text! #\n"
+                             "#paragraph\n"
+                             "And this is a paragraph!\n"
+                             "#end\n"
+                             "#end\n";
 
 /*bool compare_tag(std::optional<std::shared_ptr<louvre::Tag>> o1,
                  std::optional<std::shared_ptr<louvre::Tag>> o2) {
@@ -76,23 +77,23 @@ int main(void) {
     auto parse_res = parser.parse();
 
     if (auto e = std::get_if<louvre::SyntaxError>(&parse_res)) {
-        std::wcout << "Syntax Error " << e->message() << " at "
-                   << e->location().line() << ":" << e->location().column()
-                   << std::endl;
+        /*std::cout << "Syntax Error " << e->message() << " at "
+                  << e->location().line() << ":" << e->location().column()
+                  << std::endl;*/
 
         return -1;
     }
 
     if (auto e = std::get_if<louvre::TagError>(&parse_res)) {
-        std::wcout << "Tag Error " << e->message() << "(" << e->tag()->name()
-                   << ") at " << e->tag()->location().line() << ":"
-                   << e->tag()->location().column() << std::endl;
+        /*std::cout << "Tag Error " << e->message() << "(" << e->tag()->name()
+                  << ") at " << e->tag()->location().line() << ":"
+                  << e->tag()->location().column() << std::endl;*/
 
         return -1;
     }
 
     if (auto e = std::get_if<louvre::NodeError>(&parse_res)) {
-        std::cout << "Node Error" << std::endl;
+        // std::cout << "Node Error" << std::endl;
         return -1;
     }
 
