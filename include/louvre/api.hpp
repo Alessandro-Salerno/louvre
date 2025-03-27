@@ -65,15 +65,15 @@ class SourceLocation {
 
 class Tag {
     private:
-    const std::wstring        mName;
+    const std::u8string        mName;
     const SourceLocation      mLocation;
-    std::vector<std::wstring> mArguments;
+    std::vector<std::u8string> mArguments;
 
     public:
-    Tag(std::wstring name, SourceLocation location)
+    Tag(std::u8string name, SourceLocation location)
         : mName(name), mLocation(location) {};
 
-    inline const std::wstring name() const {
+    inline const std::u8string name() const {
         return this->mName;
     }
 
@@ -81,19 +81,19 @@ class Tag {
         return this->mLocation;
     }
 
-    inline const std::vector<std::wstring> arguments() const {
+    inline const std::vector<std::u8string> arguments() const {
         return this->mArguments;
     }
 
-    inline void add_argument(std::wstring argument) {
+    inline void add_argument(std::u8string argument) {
         this->mArguments.push_back(argument);
     }
 };
 
 class Node : public std::enable_shared_from_this<Node> {
     private:
-    const std::variant<StandardNodeType, std::wstring> mType;
-    std::optional<std::wstring>                        mText;
+    const std::variant<StandardNodeType, std::u8string> mType;
+    std::optional<std::u8string>                        mText;
     std::optional<std::shared_ptr<Tag>>                mTag;
     std::optional<std::shared_ptr<Node>>               mParent;
     std::vector<std::shared_ptr<Node>>                 mChildren;
@@ -102,20 +102,20 @@ class Node : public std::enable_shared_from_this<Node> {
     public:
     Node() : Node(StandardNodeType::Root) {};
     Node(StandardNodeType type) : mType(type) {};
-    Node(std::wstring type) : mType(type), mNum(0) {};
+    Node(std::u8string type) : mType(type), mNum(0) {};
     Node(Node &&other) noexcept = default;
 
-    static inline Node text(std::wstring text) {
+    static inline Node text(std::u8string text) {
         Node n(StandardNodeType::Text);
         n.mText = text;
         return n; // ret val optimization helps here
     }
 
-    inline const std::variant<StandardNodeType, std::wstring> type() const {
+    inline const std::variant<StandardNodeType, std::u8string> type() const {
         return this->mType;
     }
 
-    inline const std::optional<std::wstring> text() const {
+    inline const std::optional<std::u8string> text() const {
         return this->mText;
     }
 
@@ -156,14 +156,14 @@ class Node : public std::enable_shared_from_this<Node> {
 
 class SyntaxError {
     private:
-    const std::wstring   mMessage;
+    const std::u8string   mMessage;
     const SourceLocation mLocation;
 
     public:
-    SyntaxError(std::wstring message, SourceLocation location)
+    SyntaxError(std::u8string message, SourceLocation location)
         : mMessage(message), mLocation(location) {};
 
-    inline const std::wstring message() const {
+    inline const std::u8string message() const {
         return this->mMessage;
     }
 
@@ -174,14 +174,14 @@ class SyntaxError {
 
 class TagError {
     private:
-    const std::wstring         mMessage;
+    const std::u8string         mMessage;
     const std::shared_ptr<Tag> mTag;
 
     public:
-    TagError(std::wstring message, std::shared_ptr<Tag> tag)
+    TagError(std::u8string message, std::shared_ptr<Tag> tag)
         : mMessage(message), mTag(tag) {};
 
-    inline const std::wstring message() const {
+    inline const std::u8string message() const {
         return this->mMessage;
     }
 
@@ -192,14 +192,14 @@ class TagError {
 
 class NodeError {
     private:
-    const std::wstring          mMessage;
+    const std::u8string          mMessage;
     const std::shared_ptr<Node> mNode;
 
     public:
-    NodeError(std::wstring message, std::shared_ptr<Node> node)
+    NodeError(std::u8string message, std::shared_ptr<Node> node)
         : mMessage(message), mNode(node) {};
 
-    inline const std::wstring message() const {
+    inline const std::u8string message() const {
         return this->mMessage;
     }
 
@@ -210,9 +210,9 @@ class NodeError {
 
 class Parser {
     private:
-    const std::wstring mSource;
+    const std::u8string mSource;
     std::unordered_map<
-        std::wstring,
+        std::u8string,
         std::function<std::pair<ParserAction, Node>(std::shared_ptr<Tag>)>>
                 mTagBindings;
     std::size_t mOffset;
@@ -220,10 +220,10 @@ class Parser {
     std::size_t mColumn;
 
     public:
-    Parser(std::wstring source);
+    Parser(std::u8string source);
 
     inline void add_tag_binding(
-        std::wstring tag,
+        std::u8string tag,
         std::function<std::pair<ParserAction, Node>(std::shared_ptr<Tag>)>
             binding) {
         this->mTagBindings[tag] = binding;
@@ -233,20 +233,20 @@ class Parser {
     parse();
 
     private:
-    static inline bool          is_tag_char(wchar_t c);
-    static inline std::wstring  trim(std::wstring &s);
+    static inline bool          is_tag_char(char32_t c);
+    static inline std::u8string  trim(std::u8string &s);
     inline const SourceLocation location() const;
     inline bool                 can_advance(std::size_t amount = 1) const;
     inline void                 advance(std::size_t amount = 1);
     inline void                 backtracK(std::size_t amount = 1);
-    inline const std::optional<wchar_t> peek(std::size_t ahead = 0) const;
-    inline wchar_t                      quick_peek(std::size_t ahead = 0) const;
+    inline const std::optional<char32_t> peek(std::size_t ahead = 0) const;
+    inline char32_t                      quick_peek(std::size_t ahead = 0) const;
     inline void                         advance_line();
-    inline wchar_t                      consume();
+    inline char32_t                      consume();
     void                                skip_whitespace();
-    const std::variant<wchar_t, SyntaxError>
-                 consume_if(const std::wstring &allowed);
-    std::wstring collect_sequence();
+    const std::variant<char32_t, SyntaxError>
+                 consume_if(const std::u8string &allowed);
+    std::u8string collect_sequence();
     const std::variant<std::shared_ptr<Tag>, SyntaxError> collect_tag();
     const std::variant<std::pair<ParserAction, std::shared_ptr<Node>>, TagError>
     tag_to_node(std::shared_ptr<Tag> tag);

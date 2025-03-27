@@ -120,8 +120,8 @@ int main(int argc, const char *const argv[]) {
     std::wifstream input(argv[1]);
 
     // Read whole file
-    std::wstring source((std::istreambuf_iterator<wchar_t>(input)),
-                        std::istreambuf_iterator<wchar_t>());
+    std::u8string source((std::istreambuf_iterator<char32_t>(input)),
+                        std::istreambuf_iterator<char32_t>());
 
     // Create the louvre parser instance using the contents of the file
     auto parser = louvre::Parser(source);

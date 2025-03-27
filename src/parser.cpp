@@ -23,66 +23,66 @@
 #include <variant>
 
 namespace louvre {
-Parser::Parser(std::wstring source) : mSource(source) {
+Parser::Parser(std::u8string source) : mSource(source) {
     this->mOffset = 0;
     this->mLine   = 0;
     this->mColumn = 0;
 
     // #end
-    this->add_tag_binding(L"end", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"end", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::End, Node(StandardNodeType::Null));
     });
 
     // #left
-    this->add_tag_binding(L"left", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"left", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Left));
     });
 
     // #center
-    this->add_tag_binding(L"center", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"center", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Center));
     });
 
     // #right
-    this->add_tag_binding(L"right", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"right", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Right));
     });
 
     // #justify
-    this->add_tag_binding(L"justify", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"justify", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Justify));
     });
 
     // #paragraph
-    this->add_tag_binding(L"paragraph", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"paragraph", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Paragraph));
     });
 
     // #numbers
-    this->add_tag_binding(L"numbers", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"numbers", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Numebrs));
     });
 
     // #bullets
-    this->add_tag_binding(L"bullets", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"bullets", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Bullets));
     });
 
     // #item
-    this->add_tag_binding(L"item", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"item", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Item));
     });
 
     // # (new line)
-    this->add_tag_binding(L"", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding(u8"", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChild,
                               Node(StandardNodeType::LineBreak));
     });
@@ -128,7 +128,7 @@ Parser::parse() {
 
         case ParserAction::End:
             if (!root->parent()) {
-                return NodeError(L"Unexpected branch return at root level",
+                return NodeError(u8"Unexpected branch return at root leveu8",
                                  node);
             }
 
@@ -143,7 +143,7 @@ Parser::parse() {
     return root;
 }
 
-inline std::wstring Parser::trim(std::wstring &s) {
+inline std::u8string Parser::trim(std::u8string &s) {
     s.erase(std::find_if(s.rbegin(),
                          s.rend(),
                          [](unsigned char ch) { return !std::iswspace(ch); })
@@ -153,7 +153,7 @@ inline std::wstring Parser::trim(std::wstring &s) {
     return s;
 }
 
-inline bool Parser::is_tag_char(wchar_t c) {
+inline bool Parser::is_tag_char(char32_t c) {
     return std::iswalnum(c) || '_' == c;
 }
 
@@ -174,7 +174,7 @@ inline void Parser::backtracK(std::size_t amount) {
     this->advance(-amount);
 }
 
-inline const std::optional<wchar_t> Parser::peek(std::size_t ahead) const {
+inline const std::optional<char32_t> Parser::peek(std::size_t ahead) const {
     if (this->can_advance(ahead)) {
         return this->mSource[this->mOffset + ahead];
     }
@@ -182,8 +182,8 @@ inline const std::optional<wchar_t> Parser::peek(std::size_t ahead) const {
     return std::nullopt;
 }
 
-inline wchar_t Parser::quick_peek(std::size_t ahead) const {
-    return this->peek(ahead).value_or(L'\0');
+inline char32_t Parser::quick_peek(std::size_t ahead) const {
+    return this->peek(ahead).value_or(u8'\0');
 }
 
 inline void Parser::advance_line() {
@@ -191,8 +191,8 @@ inline void Parser::advance_line() {
     this->mColumn = 0;
 }
 
-inline wchar_t Parser::consume() {
-    wchar_t c = this->quick_peek();
+inline char32_t Parser::consume() {
+    char32_t c = this->quick_peek();
     this->advance();
     return c;
 }
@@ -203,21 +203,21 @@ void Parser::skip_whitespace() {
     }
 }
 
-const std::variant<wchar_t, SyntaxError>
-Parser::consume_if(const std::wstring &allowed) {
+const std::variant<char32_t, SyntaxError>
+Parser::consume_if(const std::u8string &allowed) {
     if (!this->peek().has_value()) {
-        return SyntaxError(L"Unexpected EOF", this->location());
+        return SyntaxError(u8"Unexpected EOF", this->location());
     }
 
-    if (std::wstring::npos == allowed.find(this->quick_peek())) {
-        return SyntaxError(L"Unexpected token", this->location());
+    if (std::u8string::npos == allowed.find(this->quick_peek())) {
+        return SyntaxError(u8"Unexpected token", this->location());
     }
 
     return this->consume();
 }
 
-std::wstring Parser::collect_sequence() {
-    std::wstring buf;
+std::u8string Parser::collect_sequence() {
+    std::u8string buf;
 
     while (this->can_advance() && Parser::is_tag_char(this->quick_peek())) {
         buf.push_back(this->consume());
@@ -229,28 +229,28 @@ std::wstring Parser::collect_sequence() {
 const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
     this->advance();
     SourceLocation location = this->location();
-    std::wstring   tag_name = this->collect_sequence();
+    std::u8string   tag_name = this->collect_sequence();
     auto           tag = std::make_shared<Tag>(std::move(tag_name), location);
 
-    if (std::holds_alternative<SyntaxError>(this->consume_if(L"("))) {
+    if (std::holds_alternative<SyntaxError>(this->consume_if(u8"("))) {
         return tag;
     }
 
     while (true) {
         this->skip_whitespace();
-        std::wstring arg = this->collect_sequence();
+        std::u8string arg = this->collect_sequence();
 
         if (!arg.empty()) {
             tag->add_argument(arg);
         }
 
-        std::variant<wchar_t, SyntaxError> next = this->consume_if(L",)");
+        std::variant<char32_t, SyntaxError> next = this->consume_if(u8",)");
 
         if (std::holds_alternative<SyntaxError>(next)) {
             return std::get<SyntaxError>(next);
         }
 
-        if (L')' == std::get<wchar_t>(next)) {
+        if (u8')' == std::get<char32_t>(next)) {
             break;
         }
     }
@@ -267,17 +267,17 @@ Parser::tag_to_node(std::shared_ptr<Tag> tag) {
         return std::make_pair(action, std::make_shared<Node>(std::move(node)));
     }
 
-    return TagError(L"Unknown tag", tag);
+    return TagError(u8"Unknown tag", tag);
 }
 
 const std::optional<std::variant<std::pair<ParserAction, std::shared_ptr<Node>>,
                                  SyntaxError,
                                  TagError>>
 Parser::collect_block() {
-    std::wstring buf;
+    std::u8string buf;
 
     while (this->can_advance()) {
-        const wchar_t cur = this->quick_peek();
+        const char32_t cur = this->quick_peek();
 
         if ('\t' == cur) {
             this->advance();
@@ -292,7 +292,7 @@ Parser::collect_block() {
             continue;
         }
 
-        const wchar_t next = this->quick_peek(1);
+        const char32_t next = this->quick_peek(1);
 
         if (cur == next && '#' == cur) {
             buf.push_back(cur);
