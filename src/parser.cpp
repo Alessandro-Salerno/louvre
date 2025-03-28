@@ -29,60 +29,60 @@ Parser::Parser(std::string source) : mSource(source) {
     this->mColumn = 0;
 
     // #end
-    this->add_tag_binding(u8"end", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("end", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::End, Node(StandardNodeType::Null));
     });
 
     // #left
-    this->add_tag_binding(u8"left", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("left", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Left));
     });
 
     // #center
-    this->add_tag_binding(u8"center", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("center", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Center));
     });
 
     // #right
-    this->add_tag_binding(u8"right", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("right", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Right));
     });
 
     // #justify
-    this->add_tag_binding(u8"justify", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("justify", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Justify));
     });
 
     // #paragraph
-    this->add_tag_binding(u8"paragraph", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("paragraph", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Paragraph));
     });
 
     // #numbers
-    this->add_tag_binding(u8"numbers", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("numbers", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Numebrs));
     });
 
     // #bullets
-    this->add_tag_binding(u8"bullets", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("bullets", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Bullets));
     });
 
     // #item
-    this->add_tag_binding(u8"item", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("item", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChildAndBranch,
                               Node(StandardNodeType::Item));
     });
 
     // # (new line)
-    this->add_tag_binding(u8"", [](std::shared_ptr<Tag> tag) {
+    this->add_tag_binding("", [](std::shared_ptr<Tag> tag) {
         return std::make_pair(ParserAction::AddChild,
                               Node(StandardNodeType::LineBreak));
     });
@@ -128,7 +128,7 @@ Parser::parse() {
 
         case ParserAction::End:
             if (!root->parent()) {
-                return NodeError(u8"Unexpected branch return at root leveu8",
+                return NodeError("Unexpected branch return at root leve",
                                  node);
             }
 
@@ -183,7 +183,7 @@ inline const std::optional<char32_t> Parser::peek(std::size_t ahead) const {
 }
 
 inline char32_t Parser::quick_peek(std::size_t ahead) const {
-    return this->peek(ahead).value_or(u8'\0');
+    return this->peek(ahead).value_or('\0');
 }
 
 inline void Parser::advance_line() {
@@ -206,11 +206,11 @@ void Parser::skip_whitespace() {
 const std::variant<char32_t, SyntaxError>
 Parser::consume_if(const std::string &allowed) {
     if (!this->peek().has_value()) {
-        return SyntaxError(u8"Unexpected EOF", this->location());
+        return SyntaxError("Unexpected EOF", this->location());
     }
 
     if (std::string::npos == allowed.find(this->quick_peek())) {
-        return SyntaxError(u8"Unexpected token", this->location());
+        return SyntaxError("Unexpected token", this->location());
     }
 
     return this->consume();
@@ -232,7 +232,7 @@ const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
     std::string   tag_name = this->collect_sequence();
     auto           tag = std::make_shared<Tag>(std::move(tag_name), location);
 
-    if (std::holds_alternative<SyntaxError>(this->consume_if(u8"("))) {
+    if (std::holds_alternative<SyntaxError>(this->consume_if("("))) {
         return tag;
     }
 
@@ -244,13 +244,13 @@ const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
             tag->add_argument(arg);
         }
 
-        std::variant<char32_t, SyntaxError> next = this->consume_if(u8",)");
+        std::variant<char32_t, SyntaxError> next = this->consume_if(",)");
 
         if (std::holds_alternative<SyntaxError>(next)) {
             return std::get<SyntaxError>(next);
         }
 
-        if (u8')' == std::get<char32_t>(next)) {
+        if (')' == std::get<char32_t>(next)) {
             break;
         }
     }
@@ -267,7 +267,7 @@ Parser::tag_to_node(std::shared_ptr<Tag> tag) {
         return std::make_pair(action, std::make_shared<Node>(std::move(node)));
     }
 
-    return TagError(u8"Unknown tag", tag);
+    return TagError("Unknown tag", tag);
 }
 
 const std::optional<std::variant<std::pair<ParserAction, std::shared_ptr<Node>>,

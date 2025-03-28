@@ -27,7 +27,7 @@
         return false;                                                \
     }
 
-const std::string SOURCE = u8"#\n"
+const std::string SOURCE = "#\n"
                              "#center\n"
                              "THIS IS THE TITLE\n"
                              "#end\n"
@@ -105,18 +105,18 @@ int main(void) {
     auto center =
         std::make_shared<louvre::Node>(louvre::StandardNodeType::Center);
     center->add_child(std::make_shared<louvre::Node>(
-        louvre::Node::text(u8"THIS IS THE TITLE")));
+        louvre::Node::text("THIS IS THE TITLE")));
 
     auto justify =
         std::make_shared<louvre::Node>(louvre::StandardNodeType::Justify);
     justify->add_child(std::make_shared<louvre::Node>(
-        std::move(louvre::Node::text(u8"Hello there, this is some text!"))));
+        std::move(louvre::Node::text("Hello there, this is some text!"))));
     justify->add_child(
         std::make_shared<louvre::Node>(louvre::StandardNodeType::LineBreak));
     auto paragraph =
         std::make_shared<louvre::Node>(louvre::StandardNodeType::Paragraph);
     paragraph->add_child(std::make_shared<louvre::Node>(
-        std::move(louvre::Node::text(u8"And this is a paragraph!"))));
+        std::move(louvre::Node::text("And this is a paragraph!"))));
     justify->add_child(paragraph);
 
     mroot->add_child(
