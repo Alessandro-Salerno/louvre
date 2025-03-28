@@ -48,10 +48,16 @@ class SourceLocation {
     private:
     const std::size_t mLine;
     const std::size_t mColumn;
+    const std::size_t mGlobalOffset;
+    const std::size_t mLineOffset;
 
     public:
-    SourceLocation(std::size_t line, std::size_t column)
-        : mLine(line), mColumn(column) {};
+    SourceLocation(std::size_t line,
+                   std::size_t column,
+                   std::size_t global_offset,
+                   std::size_t line_offset)
+        : mLine(line), mColumn(column), mGlobalOffset(global_offset),
+          mLineOffset(line_offset) {};
 
     inline const std::size_t line() const {
         return this->mLine;
@@ -60,12 +66,20 @@ class SourceLocation {
     inline const std::size_t column() const {
         return this->mColumn;
     }
+
+    inline const std::size_t global_offset() const {
+        return this->mGlobalOffset;
+    }
+
+    inline const std::size_t line_offset() const {
+        return this->mLineOffset;
+    }
 };
 
 class Tag {
     private:
     const std::string        mName;
-    const SourceLocation       mLocation;
+    const SourceLocation     mLocation;
     std::vector<std::string> mArguments;
 
     public:
@@ -93,10 +107,10 @@ class Node : public std::enable_shared_from_this<Node> {
     private:
     const std::variant<StandardNodeType, std::string> mType;
     std::optional<std::string>                        mText;
-    std::optional<std::shared_ptr<Tag>>                 mTag;
-    std::optional<std::shared_ptr<Node>>                mParent;
-    std::vector<std::shared_ptr<Node>>                  mChildren;
-    std::size_t                                         mNum;
+    std::optional<std::shared_ptr<Tag>>               mTag;
+    std::optional<std::shared_ptr<Node>>              mParent;
+    std::vector<std::shared_ptr<Node>>                mChildren;
+    std::size_t                                       mNum;
 
     public:
     Node() : Node(StandardNodeType::Root) {};
@@ -155,7 +169,7 @@ class Node : public std::enable_shared_from_this<Node> {
 
 class SyntaxError {
     private:
-    const std::string  mMessage;
+    const std::string    mMessage;
     const SourceLocation mLocation;
 
     public:
@@ -173,7 +187,7 @@ class SyntaxError {
 
 class TagError {
     private:
-    const std::string        mMessage;
+    const std::string          mMessage;
     const std::shared_ptr<Tag> mTag;
 
     public:
@@ -191,7 +205,7 @@ class TagError {
 
 class NodeError {
     private:
-    const std::string         mMessage;
+    const std::string           mMessage;
     const std::shared_ptr<Node> mNode;
 
     public:
@@ -214,7 +228,8 @@ class Parser {
         std::string,
         std::function<std::pair<ParserAction, Node>(std::shared_ptr<Tag>)>>
                 mTagBindings;
-    std::size_t mOffset;
+    std::size_t mGlobalOffset;
+    std::size_t mLineOffset;
     std::size_t mLine;
     std::size_t mColumn;
 
@@ -232,19 +247,18 @@ class Parser {
     parse();
 
     private:
-    static inline bool          is_tag_char(char32_t c);
-    static inline std::string trim(std::string &s);
-    inline const SourceLocation location() const;
-    inline bool                 can_advance(std::size_t amount = 1) const;
-    inline void                 advance(std::size_t amount = 1);
-    inline void                 backtracK(std::size_t amount = 1);
-    inline const std::optional<char32_t> peek(std::size_t ahead = 0) const;
-    inline char32_t quick_peek(std::size_t ahead = 0) const;
-    inline void     advance_line();
-    inline char32_t consume();
-    void            skip_whitespace();
-    const std::variant<char32_t, SyntaxError>
-                  consume_if(const std::string &allowed);
+    static inline bool               is_tag_char(char c);
+    static inline std::string        trim(std::string &s);
+    inline const SourceLocation      location() const;
+    inline bool                      can_advance(std::size_t amount = 0) const;
+    inline void                      advance(std::size_t amount = 1);
+    inline const std::optional<char> peek(std::size_t ahead = 0) const;
+    inline char                      quick_peek(std::size_t ahead = 0) const;
+    inline void                      advance_line();
+    inline char                      consume();
+    void                             skip_whitespace();
+    const std::variant<char, SyntaxError>
+                consume_if(const std::string &allowed);
     std::string collect_sequence();
     const std::variant<std::shared_ptr<Tag>, SyntaxError> collect_tag();
     const std::variant<std::pair<ParserAction, std::shared_ptr<Node>>, TagError>

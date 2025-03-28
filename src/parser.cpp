@@ -13,6 +13,7 @@
  *   limitations under the License.
  */
 
+#include <cstddef>
 #include <cwctype>
 #include <louvre/api.hpp>
 #include <memory>
@@ -23,9 +24,10 @@
 
 namespace louvre {
 Parser::Parser(std::string source) : mSource(source) {
-    this->mOffset = 0;
-    this->mLine   = 0;
-    this->mColumn = 0;
+    this->mGlobalOffset = 0;
+    this->mLineOffset   = 0;
+    this->mLine         = 0;
+    this->mColumn       = 0;
 
     // #end
     this->add_tag_binding("end", [](std::shared_ptr<Tag> tag) {
@@ -157,46 +159,54 @@ inline std::string Parser::trim(std::string &s) {
     return s;
 }
 
-inline bool Parser::is_tag_char(char32_t c) {
-    return std::iswalnum(c) || '_' == c;
+inline bool Parser::is_tag_char(char c) {
+    return std::isalnum(c) || '_' == c;
 }
 
 inline const SourceLocation Parser::location() const {
-    return SourceLocation(this->mLine, this->mColumn);
+    return SourceLocation(
+        this->mLine, this->mColumn, this->mGlobalOffset, this->mLineOffset);
 }
 
 inline bool Parser::can_advance(std::size_t amount) const {
-    return this->mOffset + amount < this->mSource.length();
+    return this->mGlobalOffset + amount < this->mSource.length();
 }
 
 inline void Parser::advance(std::size_t amount) {
-    this->mOffset += amount;
-    this->mColumn += amount;
+    // UTF-8 magic
+    for (std::size_t i = 0; i < amount; i++) {
+        char cur    = this->quick_peek();
+        char masked = (cur & 0b11110000) >> 4;
+
+        this->mGlobalOffset += 1;
+        this->mLineOffset += 1;
+
+        if (0 == masked || masked >= 0b1100) {
+            this->mColumn += 1;
+        }
+    }
 }
 
-inline void Parser::backtracK(std::size_t amount) {
-    this->advance(-amount);
-}
-
-inline const std::optional<char32_t> Parser::peek(std::size_t ahead) const {
+inline const std::optional<char> Parser::peek(std::size_t ahead) const {
     if (this->can_advance(ahead)) {
-        return this->mSource[this->mOffset + ahead];
+        return this->mSource[this->mGlobalOffset + ahead];
     }
 
     return std::nullopt;
 }
 
-inline char32_t Parser::quick_peek(std::size_t ahead) const {
+inline char Parser::quick_peek(std::size_t ahead) const {
     return this->peek(ahead).value_or('\0');
 }
 
 inline void Parser::advance_line() {
     this->mLine++;
-    this->mColumn = 0;
+    this->mColumn     = 0;
+    this->mLineOffset = 0;
 }
 
-inline char32_t Parser::consume() {
-    char32_t c = this->quick_peek();
+inline char Parser::consume() {
+    char c = this->quick_peek();
     this->advance();
     return c;
 }
@@ -207,7 +217,7 @@ void Parser::skip_whitespace() {
     }
 }
 
-const std::variant<char32_t, SyntaxError>
+const std::variant<char, SyntaxError>
 Parser::consume_if(const std::string &allowed) {
     if (!this->peek().has_value()) {
         return SyntaxError("Unexpected EOF", this->location());
@@ -248,13 +258,13 @@ const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
             tag->add_argument(arg);
         }
 
-        std::variant<char32_t, SyntaxError> next = this->consume_if(",)");
+        std::variant<char, SyntaxError> next = this->consume_if(",)");
 
         if (std::holds_alternative<SyntaxError>(next)) {
             return std::get<SyntaxError>(next);
         }
 
-        if (')' == std::get<char32_t>(next)) {
+        if (')' == std::get<char>(next)) {
             break;
         }
     }
@@ -281,7 +291,7 @@ Parser::collect_block() {
     std::string buf;
 
     while (this->can_advance()) {
-        const char32_t cur = this->quick_peek();
+        const char cur = this->quick_peek();
 
         if ('\t' == cur) {
             this->advance();
@@ -296,7 +306,7 @@ Parser::collect_block() {
             continue;
         }
 
-        const char32_t next = this->quick_peek(1);
+        const char next = this->quick_peek(1);
 
         if (cur == next && '#' == cur) {
             buf.push_back(cur);
