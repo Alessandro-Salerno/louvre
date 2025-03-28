@@ -13,7 +13,6 @@
  *   limitations under the License.
  */
 
-#include <algorithm>
 #include <cwctype>
 #include <louvre/api.hpp>
 #include <memory>
@@ -128,8 +127,7 @@ Parser::parse() {
 
         case ParserAction::End:
             if (!root->parent()) {
-                return NodeError("Unexpected branch return at root leve",
-                                 node);
+                return NodeError("Unexpected branch return at root leve", node);
             }
 
             root = root->parent().value();
@@ -143,13 +141,19 @@ Parser::parse() {
     return root;
 }
 
+// TODO: properly support UTF8 whitespace chracters
 inline std::string Parser::trim(std::string &s) {
-    s.erase(std::find_if(s.rbegin(),
-                         s.rend(),
-                         [](unsigned char ch) { return !std::iswspace(ch); })
-                .base(),
-            s.end());
+    size_t start = 0;
+    while (start < s.length() && std::isspace(s[start])) {
+        start++;
+    }
 
+    size_t end = s.length();
+    while (end > start && std::isspace(s[end - 1])) {
+        end--;
+    }
+
+    s = s.substr(start, end - start);
     return s;
 }
 
@@ -229,7 +233,7 @@ std::string Parser::collect_sequence() {
 const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
     this->advance();
     SourceLocation location = this->location();
-    std::string   tag_name = this->collect_sequence();
+    std::string    tag_name = this->collect_sequence();
     auto           tag = std::make_shared<Tag>(std::move(tag_name), location);
 
     if (std::holds_alternative<SyntaxError>(this->consume_if("("))) {

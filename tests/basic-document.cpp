@@ -28,16 +28,16 @@
     }
 
 const std::string SOURCE = "#\n"
-                             "#center\n"
-                             "THIS IS THE TITLE\n"
-                             "#end\n"
-                             "#\n"
-                             "#justify\n"
-                             "Hello there, this is some text! #\n"
-                             "#paragraph\n"
-                             "And this is a paragraph!\n"
-                             "#end\n"
-                             "#end\n";
+                           "#center\n"
+                           "THIS IS THE TITLE\n"
+                           "#end\n"
+                           "#\n"
+                           "#justify\n"
+                           "Hello there, this is some text! #\n"
+                           "#paragraph\n"
+                           "And this is a paragraph!\n"
+                           "#end\n"
+                           "#end\n";
 
 /*bool compare_tag(std::optional<std::shared_ptr<louvre::Tag>> o1,
                  std::optional<std::shared_ptr<louvre::Tag>> o2) {
@@ -61,6 +61,14 @@ bool compare_nodes(std::shared_ptr<louvre::Node> n1,
                    std::size_t                   nest = 0) {
     std::cout << "Testing nest level " << nest << std::endl;
     massert(n1->type() == n2->type());
+    if (n1->text()) {
+        std::cout << "N1(" << (*n1->text()).length() << "): " << *n1->text();
+        if (n2->text()) {
+            std::cout << " N2(" << (*n2->text()).length()
+                      << "): " << *n2->text();
+        }
+        std::cout << std::endl;
+    }
     massert(n1->text() == n2->text());
     massert(n1->children().size() == n2->children().size());
 
@@ -77,23 +85,23 @@ int main(void) {
     auto parse_res = parser.parse();
 
     if (auto e = std::get_if<louvre::SyntaxError>(&parse_res)) {
-        /*std::cout << "Syntax Error " << e->message() << " at "
+        std::cout << "Syntax Error " << e->message() << " at "
                   << e->location().line() << ":" << e->location().column()
-                  << std::endl;*/
+                  << std::endl;
 
         return -1;
     }
 
     if (auto e = std::get_if<louvre::TagError>(&parse_res)) {
-        /*std::cout << "Tag Error " << e->message() << "(" << e->tag()->name()
+        std::cout << "Tag Error " << e->message() << "(" << e->tag()->name()
                   << ") at " << e->tag()->location().line() << ":"
-                  << e->tag()->location().column() << std::endl;*/
+                  << e->tag()->location().column() << std::endl;
 
         return -1;
     }
 
     if (auto e = std::get_if<louvre::NodeError>(&parse_res)) {
-        // std::cout << "Node Error" << std::endl;
+        std::cout << "Node Error" << std::endl;
         return -1;
     }
 
