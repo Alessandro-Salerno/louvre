@@ -64,15 +64,15 @@ class SourceLocation {
 
 class Tag {
     private:
-    const std::u8string        mName;
+    const std::string        mName;
     const SourceLocation       mLocation;
-    std::vector<std::u8string> mArguments;
+    std::vector<std::string> mArguments;
 
     public:
-    Tag(std::u8string name, SourceLocation location)
+    Tag(std::string name, SourceLocation location)
         : mName(name), mLocation(location) {};
 
-    inline const std::u8string name() const {
+    inline const std::string name() const {
         return this->mName;
     }
 
@@ -80,19 +80,19 @@ class Tag {
         return this->mLocation;
     }
 
-    inline const std::vector<std::u8string> arguments() const {
+    inline const std::vector<std::string> arguments() const {
         return this->mArguments;
     }
 
-    inline void add_argument(std::u8string argument) {
+    inline void add_argument(std::string argument) {
         this->mArguments.push_back(argument);
     }
 };
 
 class Node : public std::enable_shared_from_this<Node> {
     private:
-    const std::variant<StandardNodeType, std::u8string> mType;
-    std::optional<std::u8string>                        mText;
+    const std::variant<StandardNodeType, std::string> mType;
+    std::optional<std::string>                        mText;
     std::optional<std::shared_ptr<Tag>>                 mTag;
     std::optional<std::shared_ptr<Node>>                mParent;
     std::vector<std::shared_ptr<Node>>                  mChildren;
@@ -101,20 +101,20 @@ class Node : public std::enable_shared_from_this<Node> {
     public:
     Node() : Node(StandardNodeType::Root) {};
     Node(StandardNodeType type) : mType(type) {};
-    Node(std::u8string type) : mType(type), mNum(0) {};
+    Node(std::string type) : mType(type), mNum(0) {};
     Node(Node &&other) noexcept = default;
 
-    static inline Node text(std::u8string text) {
+    static inline Node text(std::string text) {
         Node n(StandardNodeType::Text);
         n.mText = text;
         return n; // ret val optimization helps here
     }
 
-    inline const std::variant<StandardNodeType, std::u8string> type() const {
+    inline const std::variant<StandardNodeType, std::string> type() const {
         return this->mType;
     }
 
-    inline const std::optional<std::u8string> text() const {
+    inline const std::optional<std::string> text() const {
         return this->mText;
     }
 
@@ -155,14 +155,14 @@ class Node : public std::enable_shared_from_this<Node> {
 
 class SyntaxError {
     private:
-    const std::u8string  mMessage;
+    const std::string  mMessage;
     const SourceLocation mLocation;
 
     public:
-    SyntaxError(std::u8string message, SourceLocation location)
+    SyntaxError(std::string message, SourceLocation location)
         : mMessage(message), mLocation(location) {};
 
-    inline const std::u8string message() const {
+    inline const std::string message() const {
         return this->mMessage;
     }
 
@@ -173,14 +173,14 @@ class SyntaxError {
 
 class TagError {
     private:
-    const std::u8string        mMessage;
+    const std::string        mMessage;
     const std::shared_ptr<Tag> mTag;
 
     public:
-    TagError(std::u8string message, std::shared_ptr<Tag> tag)
+    TagError(std::string message, std::shared_ptr<Tag> tag)
         : mMessage(message), mTag(tag) {};
 
-    inline const std::u8string message() const {
+    inline const std::string message() const {
         return this->mMessage;
     }
 
@@ -191,14 +191,14 @@ class TagError {
 
 class NodeError {
     private:
-    const std::u8string         mMessage;
+    const std::string         mMessage;
     const std::shared_ptr<Node> mNode;
 
     public:
-    NodeError(std::u8string message, std::shared_ptr<Node> node)
+    NodeError(std::string message, std::shared_ptr<Node> node)
         : mMessage(message), mNode(node) {};
 
-    inline const std::u8string message() const {
+    inline const std::string message() const {
         return this->mMessage;
     }
 
@@ -209,9 +209,9 @@ class NodeError {
 
 class Parser {
     private:
-    const std::u8string mSource;
+    const std::string mSource;
     std::unordered_map<
-        std::u8string,
+        std::string,
         std::function<std::pair<ParserAction, Node>(std::shared_ptr<Tag>)>>
                 mTagBindings;
     std::size_t mOffset;
@@ -219,10 +219,10 @@ class Parser {
     std::size_t mColumn;
 
     public:
-    Parser(std::u8string source);
+    Parser(std::string source);
 
     inline void add_tag_binding(
-        std::u8string tag,
+        std::string tag,
         std::function<std::pair<ParserAction, Node>(std::shared_ptr<Tag>)>
             binding) {
         this->mTagBindings[tag] = binding;
@@ -233,7 +233,7 @@ class Parser {
 
     private:
     static inline bool          is_tag_char(char32_t c);
-    static inline std::u8string trim(std::u8string &s);
+    static inline std::string trim(std::string &s);
     inline const SourceLocation location() const;
     inline bool                 can_advance(std::size_t amount = 1) const;
     inline void                 advance(std::size_t amount = 1);
@@ -244,8 +244,8 @@ class Parser {
     inline char32_t consume();
     void            skip_whitespace();
     const std::variant<char32_t, SyntaxError>
-                  consume_if(const std::u8string &allowed);
-    std::u8string collect_sequence();
+                  consume_if(const std::string &allowed);
+    std::string collect_sequence();
     const std::variant<std::shared_ptr<Tag>, SyntaxError> collect_tag();
     const std::variant<std::pair<ParserAction, std::shared_ptr<Node>>, TagError>
     tag_to_node(std::shared_ptr<Tag> tag);

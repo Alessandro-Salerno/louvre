@@ -27,7 +27,7 @@
         return false;                                                \
     }
 
-const std::u8string SOURCE = u8"#\n"
+const std::string SOURCE = u8"#\n"
                              "#center\n"
                              "THIS IS THE TITLE\n"
                              "#end\n"

@@ -23,7 +23,7 @@
 #include <variant>
 
 namespace louvre {
-Parser::Parser(std::u8string source) : mSource(source) {
+Parser::Parser(std::string source) : mSource(source) {
     this->mOffset = 0;
     this->mLine   = 0;
     this->mColumn = 0;
@@ -143,7 +143,7 @@ Parser::parse() {
     return root;
 }
 
-inline std::u8string Parser::trim(std::u8string &s) {
+inline std::string Parser::trim(std::string &s) {
     s.erase(std::find_if(s.rbegin(),
                          s.rend(),
                          [](unsigned char ch) { return !std::iswspace(ch); })
@@ -204,20 +204,20 @@ void Parser::skip_whitespace() {
 }
 
 const std::variant<char32_t, SyntaxError>
-Parser::consume_if(const std::u8string &allowed) {
+Parser::consume_if(const std::string &allowed) {
     if (!this->peek().has_value()) {
         return SyntaxError(u8"Unexpected EOF", this->location());
     }
 
-    if (std::u8string::npos == allowed.find(this->quick_peek())) {
+    if (std::string::npos == allowed.find(this->quick_peek())) {
         return SyntaxError(u8"Unexpected token", this->location());
     }
 
     return this->consume();
 }
 
-std::u8string Parser::collect_sequence() {
-    std::u8string buf;
+std::string Parser::collect_sequence() {
+    std::string buf;
 
     while (this->can_advance() && Parser::is_tag_char(this->quick_peek())) {
         buf.push_back(this->consume());
@@ -229,7 +229,7 @@ std::u8string Parser::collect_sequence() {
 const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
     this->advance();
     SourceLocation location = this->location();
-    std::u8string   tag_name = this->collect_sequence();
+    std::string   tag_name = this->collect_sequence();
     auto           tag = std::make_shared<Tag>(std::move(tag_name), location);
 
     if (std::holds_alternative<SyntaxError>(this->consume_if(u8"("))) {
@@ -238,7 +238,7 @@ const std::variant<std::shared_ptr<Tag>, SyntaxError> Parser::collect_tag() {
 
     while (true) {
         this->skip_whitespace();
-        std::u8string arg = this->collect_sequence();
+        std::string arg = this->collect_sequence();
 
         if (!arg.empty()) {
             tag->add_argument(arg);
@@ -274,7 +274,7 @@ const std::optional<std::variant<std::pair<ParserAction, std::shared_ptr<Node>>,
                                  SyntaxError,
                                  TagError>>
 Parser::collect_block() {
-    std::u8string buf;
+    std::string buf;
 
     while (this->can_advance()) {
         const char32_t cur = this->quick_peek();
